@@ -1,9 +1,38 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Temporary permissive rules for testing - CHANGE THESE IN PRODUCTION
+    // Users can only access their own user document
+    match /users/{userId} {
+      allow read, write, create, update: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Users can only access their own expenses
+    match /expenses/{expenseId} {
+      allow read, write, update, delete: if request.auth != null &&
+        request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.userId;
+    }
+
+    // Users can only access their own budgets
+    match /budgets/{budgetId} {
+      allow read, write, update, delete: if request.auth != null &&
+        request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.userId;
+    }
+
+    // Users can only access their own budget alerts
+    match /alerts/{alertId} {
+      allow read, write, update, delete: if request.auth != null &&
+        request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.userId;
+    }
+
+    // Deny all other access
     match /{document=**} {
-      allow read, write: if request.auth != null;
+      allow read, write: if false;
     }
   }
 }

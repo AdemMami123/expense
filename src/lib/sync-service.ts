@@ -11,8 +11,9 @@ import {
   Unsubscribe
 } from 'firebase/firestore';
 import { db } from './firebase';
-import { ExpenseDB } from './database';
+import { ExpenseDB, BudgetDB } from './database';
 import { Expense } from '../types/expense';
+import type { BudgetLimit } from '../types/budget';
 
 export class SyncService {
   private static syncInProgress = false;
@@ -20,30 +21,45 @@ export class SyncService {
 
   // Sync local expenses to Firebase
   static async syncToFirebase(userId: string): Promise<void> {
-    if (this.syncInProgress) return;
-    
+    if (this.syncInProgress) {
+      console.log('Sync already in progress, skipping...');
+      return;
+    }
+
     try {
       this.syncInProgress = true;
-      console.log('Starting sync to Firebase...');
+      console.log('Starting sync to Firebase for user:', userId);
 
       const unsyncedExpenses = await ExpenseDB.getUnsyncedExpenses(userId);
-      
+      console.log(`Found ${unsyncedExpenses.length} unsynced expenses to upload`);
+
+      if (unsyncedExpenses.length === 0) {
+        console.log('No unsynced expenses found');
+        return;
+      }
+
+      let successCount = 0;
+      let failureCount = 0;
+
       for (const expense of unsyncedExpenses) {
         try {
+          console.log(`Syncing expense ${expense.id} to Firebase...`);
           await setDoc(doc(db, 'expenses', expense.id), {
             ...expense,
             synced: true
           });
-          
+
           // Mark as synced in local database
           await ExpenseDB.markAsSynced(expense.id);
-          console.log(`Synced expense ${expense.id} to Firebase`);
+          console.log(`✓ Successfully synced expense ${expense.id} to Firebase`);
+          successCount++;
         } catch (error) {
-          console.error(`Failed to sync expense ${expense.id}:`, error);
+          console.error(`✗ Failed to sync expense ${expense.id}:`, error);
+          failureCount++;
         }
       }
 
-      console.log(`Synced ${unsyncedExpenses.length} expenses to Firebase`);
+      console.log(`Sync to Firebase completed: ${successCount} successful, ${failureCount} failed`);
     } catch (error) {
       console.error('Error syncing to Firebase:', error);
       throw error;
@@ -94,15 +110,100 @@ export class SyncService {
     }
   }
 
+  // Sync local budgets to Firebase
+  static async syncBudgetsToFirebase(userId: string): Promise<void> {
+    try {
+      console.log('Starting budget sync to Firebase for user:', userId);
+
+      const unsyncedBudgets = await BudgetDB.getUnsyncedBudgets(userId);
+      console.log(`Found ${unsyncedBudgets.length} unsynced budgets to upload`);
+
+      if (unsyncedBudgets.length === 0) {
+        console.log('No unsynced budgets found');
+        return;
+      }
+
+      let successCount = 0;
+      let failureCount = 0;
+
+      for (const budget of unsyncedBudgets) {
+        try {
+          console.log(`Syncing budget ${budget.id} to Firebase...`);
+          await setDoc(doc(db, 'budgets', budget.id), {
+            ...budget,
+            synced: true
+          });
+
+          // Mark as synced in local database
+          await BudgetDB.markBudgetAsSynced(budget.id);
+          console.log(`✓ Successfully synced budget ${budget.id} to Firebase`);
+          successCount++;
+        } catch (error) {
+          console.error(`✗ Failed to sync budget ${budget.id}:`, error);
+          failureCount++;
+        }
+      }
+
+      console.log(`Budget sync to Firebase completed: ${successCount} successful, ${failureCount} failed`);
+    } catch (error) {
+      console.error('Error syncing budgets to Firebase:', error);
+      throw error;
+    }
+  }
+
+  // Sync Firebase budgets to local database
+  static async syncBudgetsFromFirebase(userId: string): Promise<void> {
+    try {
+      console.log('Starting budget sync from Firebase...');
+
+      const budgetsRef = collection(db, 'budgets');
+      const q = query(
+        budgetsRef,
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc')
+      );
+
+      const querySnapshot = await getDocs(q);
+      const firebaseBudgets: BudgetLimit[] = [];
+
+      querySnapshot.forEach((doc) => {
+        firebaseBudgets.push(doc.data() as BudgetLimit);
+      });
+
+      // Get local budgets
+      const localBudgets = await BudgetDB.getBudgets(userId);
+      const localBudgetIds = new Set(localBudgets.map(b => b.id));
+
+      // Add new budgets from Firebase to local database
+      let addedCount = 0;
+      for (const firebaseBudget of firebaseBudgets) {
+        if (!localBudgetIds.has(firebaseBudget.id)) {
+          await BudgetDB.addBudget({
+            ...firebaseBudget,
+            synced: true
+          });
+          addedCount++;
+        }
+      }
+
+      console.log(`Synced ${addedCount} new budgets from Firebase`);
+    } catch (error) {
+      console.error('Error syncing budgets from Firebase:', error);
+      throw error;
+    }
+  }
+
   // Full bidirectional sync
   static async fullSync(userId: string): Promise<void> {
     try {
-      // First sync from Firebase to get any new expenses
+      // First sync from Firebase to get any new data
       await this.syncFromFirebase(userId);
-      
+      await this.syncBudgetsFromFirebase(userId);
+
       // Then sync local changes to Firebase
       await this.syncToFirebase(userId);
-      
+      await this.syncBudgetsToFirebase(userId);
+
       console.log('Full sync completed');
     } catch (error) {
       console.error('Error during full sync:', error);
@@ -165,19 +266,27 @@ export class SyncService {
   // Auto-sync when coming back online
   static setupAutoSync(userId: string, onUpdate?: () => void): void {
     const handleOnline = async () => {
-      console.log('Device came back online, starting sync...');
+      console.log('SyncService: Device came back online, starting auto-sync...');
       try {
-        await this.fullSync(userId);
-        if (onUpdate) onUpdate();
+        // Wait a bit to ensure connection is stable
+        setTimeout(async () => {
+          await this.fullSync(userId);
+          console.log('SyncService: Auto-sync completed');
+          if (onUpdate) onUpdate();
+        }, 1000);
       } catch (error) {
-        console.error('Auto-sync failed:', error);
+        console.error('SyncService: Auto-sync failed:', error);
       }
     };
 
+    // Remove existing listener to avoid duplicates
+    window.removeEventListener('online', handleOnline);
     window.addEventListener('online', handleOnline);
+    console.log('SyncService: Auto-sync listener set up for user:', userId);
 
     // Also setup realtime sync if online
     if (this.isOnline()) {
+      console.log('SyncService: Setting up realtime sync (device is online)');
       this.setupRealtimeSync(userId, onUpdate);
     }
   }
@@ -186,6 +295,19 @@ export class SyncService {
   static cleanup(): void {
     this.listeners.forEach(unsubscribe => unsubscribe());
     this.listeners = [];
+  }
+
+  // Debug method to check unsynced expenses
+  static async debugUnsyncedExpenses(userId: string): Promise<void> {
+    try {
+      const unsyncedExpenses = await ExpenseDB.getUnsyncedExpenses(userId);
+      console.log(`DEBUG: Found ${unsyncedExpenses.length} unsynced expenses for user ${userId}:`);
+      unsyncedExpenses.forEach(expense => {
+        console.log(`- ${expense.id}: ${expense.description} (${expense.amount}) - synced: ${expense.synced}`);
+      });
+    } catch (error) {
+      console.error('Error debugging unsynced expenses:', error);
+    }
   }
 
   // Delete expense from both local and Firebase

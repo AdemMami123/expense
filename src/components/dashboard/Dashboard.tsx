@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { ExpenseStats, Expense } from '../../types/expense';
 import CategoryPieChart from '../charts/CategoryPieChart';
 import SpendingBarChart from '../charts/SpendingBarChart';
+import BudgetSummary from '../budget/BudgetSummary';
 
 interface DashboardProps {
   stats: ExpenseStats;
   expenses: Expense[];
   loading?: boolean;
+  onNavigateToBudgets?: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ stats, expenses, loading = false }) => {
+const Dashboard: React.FC<DashboardProps> = ({ stats, expenses, loading = false, onNavigateToBudgets }) => {
   const [chartPeriod, setChartPeriod] = useState<'daily' | 'weekly'>('daily');
   const formatAmount = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -145,6 +147,9 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, expenses, loading = false 
           </div>
         </div>
       </div>
+
+      {/* Budget Summary */}
+      <BudgetSummary onViewBudgets={onNavigateToBudgets} />
 
       {/* Category Breakdown Table */}
       {Object.keys(stats.categoryTotals).length > 0 && (

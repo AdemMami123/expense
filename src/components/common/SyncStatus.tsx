@@ -1,22 +1,25 @@
 import React, { useState, useEffect } from 'react';
+import { SyncService } from '../../lib/sync-service';
 
 interface SyncStatusProps {
   unsyncedCount: number;
   isOnline: boolean;
   onManualSync?: () => Promise<void>;
+  userId?: string;
 }
 
-const SyncStatus: React.FC<SyncStatusProps> = ({ 
-  unsyncedCount, 
-  isOnline, 
-  onManualSync 
+const SyncStatus: React.FC<SyncStatusProps> = ({
+  unsyncedCount,
+  isOnline,
+  onManualSync,
+  userId
 }) => {
   const [syncing, setSyncing] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
 
   const handleManualSync = async () => {
     if (!onManualSync || !isOnline || syncing) return;
-    
+
     setSyncing(true);
     try {
       await onManualSync();
@@ -26,6 +29,16 @@ const SyncStatus: React.FC<SyncStatusProps> = ({
     } finally {
       setSyncing(false);
     }
+  };
+
+  const handleDebugSync = async () => {
+    if (!userId) return;
+
+    console.log('=== SYNC DEBUG INFO ===');
+    console.log('Online status:', isOnline);
+    console.log('Unsynced count:', unsyncedCount);
+    await SyncService.debugUnsyncedExpenses(userId);
+    console.log('=== END DEBUG INFO ===');
   };
 
   const formatLastSync = (date: Date) => {
@@ -80,6 +93,17 @@ const SyncStatus: React.FC<SyncStatusProps> = ({
             </svg>
           )}
           <span>Sync</span>
+        </button>
+      )}
+
+      {/* Debug Button (only show if there are unsynced items) */}
+      {unsyncedCount > 0 && userId && (
+        <button
+          onClick={handleDebugSync}
+          className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+          title="Debug sync status (check console)"
+        >
+          Debug
         </button>
       )}
 
