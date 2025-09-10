@@ -22,12 +22,14 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, expenses, loading = false,
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="card p-6">
-            <div className="animate-pulse">
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-2"></div>
-              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+          <div key={i} className="card">
+            <div className="card-body">
+              <div className="animate-pulse">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-3"></div>
+                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+              </div>
             </div>
           </div>
         ))}
@@ -80,24 +82,31 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, expenses, loading = false,
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 sm:space-y-8">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {statCards.map((stat, index) => (
-          <div key={index} className="card p-6">
-            <div className="flex items-center">
-              <div className={`p-2 rounded-lg ${stat.color} bg-opacity-10`}>
-                <div className={stat.color}>
-                  {stat.icon}
+          <div key={index} className="card fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+            <div className="card-body">
+              <div className="flex items-center">
+                <div className={`p-3 rounded-xl bg-gradient-to-r ${
+                  stat.color.includes('blue') ? 'from-blue-500 to-blue-600' :
+                  stat.color.includes('green') ? 'from-green-500 to-green-600' :
+                  stat.color.includes('purple') ? 'from-purple-500 to-purple-600' :
+                  'from-orange-500 to-orange-600'
+                } shadow-lg`}>
+                  <div className="text-white">
+                    {stat.icon}
+                  </div>
                 </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  {stat.title}
-                </p>
-                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
-                  {stat.isCount ? stat.amount : formatAmount(stat.amount)}
-                </p>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    {stat.title}
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {stat.isCount ? stat.amount : formatAmount(stat.amount)}
+                  </p>
+                </div>
               </div>
             </div>
           </div>

@@ -53,14 +53,16 @@ const BudgetProgressCard: React.FC<BudgetProgressProps> = ({
 
   if (budgets.length === 0) {
     return (
-      <div className="card">
-        <div className="card-body text-center py-8">
-          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
-          <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No budgets</h3>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Create your first budget to start tracking your spending limits.
+      <div className="card fade-in">
+        <div className="card-body text-center py-12">
+          <div className="bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+            <svg className="h-10 w-10 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">No budgets yet</h3>
+          <p className="mt-2 text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
+            Create your first budget to start tracking your spending limits and get alerts when you're approaching them.
           </p>
         </div>
       </div>
@@ -68,9 +70,9 @@ const BudgetProgressCard: React.FC<BudgetProgressProps> = ({
   }
 
   return (
-    <div className="space-y-4">
-      {budgets.map((budget) => (
-        <div key={budget.budgetId} className="card">
+    <div className="space-y-6">
+      {budgets.map((budget, index) => (
+        <div key={budget.budgetId} className="card fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
           <div className="card-body">
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
@@ -120,19 +122,22 @@ const BudgetProgressCard: React.FC<BudgetProgressProps> = ({
             </div>
 
             {/* Progress Bar */}
-            <div className="mb-4">
-              <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
+            <div className="mb-6">
+              <div className="flex justify-between text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">
                 <span>Spent: {BudgetService.formatCurrency(budget.spent)}</span>
                 <span>Limit: {BudgetService.formatCurrency(budget.limit)}</span>
               </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 shadow-inner">
                 <div
-                  className={`h-3 rounded-full transition-all duration-300 ${getProgressBarColor(budget.status)}`}
+                  className={`h-4 rounded-full transition-all duration-500 ease-out shadow-sm ${getProgressBarColor(budget.status)}`}
                   style={{ width: `${Math.min(budget.percentage, 100)}%` }}
                 ></div>
               </div>
-              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-                <span>{budget.percentage}% used</span>
+              <div className="flex justify-between text-sm font-medium text-gray-500 dark:text-gray-400 mt-2">
+                <span className="flex items-center">
+                  <span className={`inline-block w-2 h-2 rounded-full mr-2 ${getProgressBarColor(budget.status)}`}></span>
+                  {budget.percentage}% used
+                </span>
                 <span>{BudgetService.formatCurrency(budget.remaining)} remaining</span>
               </div>
             </div>

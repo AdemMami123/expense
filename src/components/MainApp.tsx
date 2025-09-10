@@ -172,35 +172,53 @@ const MainApp: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-lg border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-xl shadow-lg mr-3">
+                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Expense Tracker
               </h1>
             </div>
 
-            <div className="flex items-center space-x-4">
-              <SyncStatus
-                unsyncedCount={syncStatus.unsyncedCount}
-                isOnline={syncStatus.isOnline}
-                onManualSync={handleManualSync}
-                userId={user?.id}
-              />
-              <ExportMenu expenses={expenses} />
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <div className="hidden sm:block">
+                <SyncStatus
+                  unsyncedCount={syncStatus.unsyncedCount}
+                  isOnline={syncStatus.isOnline}
+                  onManualSync={handleManualSync}
+                  userId={user?.id}
+                />
+              </div>
+              <div className="hidden md:block">
+                <ExportMenu expenses={expenses} />
+              </div>
               <DarkModeToggle />
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                Welcome, {user?.name}
-              </span>
+              <div className="hidden lg:block">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Welcome, {user?.name}
+                </span>
+              </div>
               <button
                 onClick={handleLogout}
                 disabled={loading}
                 className="btn-secondary text-sm disabled:opacity-50"
               >
-                {loading ? 'Logging out...' : 'Logout'}
+                {loading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin h-4 w-4 border-2 border-gray-400 border-t-transparent rounded-full"></div>
+                    <span className="hidden sm:inline">Logging out...</span>
+                  </div>
+                ) : (
+                  <span>Logout</span>
+                )}
               </button>
             </div>
           </div>
@@ -212,30 +230,35 @@ const MainApp: React.FC = () => {
 
       {/* Budget Alerts */}
       {budgetAlerts.length > 0 && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 fade-in">
+          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border border-yellow-200/50 dark:border-yellow-800/50 rounded-xl p-4 sm:p-6 shadow-lg backdrop-blur-sm">
             <div className="flex items-start">
-              <svg className="h-5 w-5 text-yellow-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-              <div className="ml-3 flex-1">
-                <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+              <div className="bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded-lg">
+                <svg className="h-5 w-5 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <div className="ml-4 flex-1">
+                <h3 className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">
                   Budget Alert{budgetAlerts.length > 1 ? 's' : ''}
                 </h3>
-                <div className="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
+                <div className="mt-2 text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
                   {budgetAlerts.slice(0, 2).map(alert => (
-                    <p key={alert.id} className="mb-1">{alert.message}</p>
+                    <p key={alert.id} className="leading-relaxed">{alert.message}</p>
                   ))}
                   {budgetAlerts.length > 2 && (
-                    <p className="text-xs">And {budgetAlerts.length - 2} more alerts...</p>
+                    <p className="text-xs font-medium">And {budgetAlerts.length - 2} more alerts...</p>
                   )}
                 </div>
-                <div className="mt-3">
+                <div className="mt-4">
                   <button
                     onClick={() => setActiveTab('budgets')}
-                    className="text-sm font-medium text-yellow-800 dark:text-yellow-200 hover:text-yellow-900 dark:hover:text-yellow-100"
+                    className="inline-flex items-center text-sm font-semibold text-yellow-800 dark:text-yellow-200 hover:text-yellow-900 dark:hover:text-yellow-100 transition-colors duration-200"
                   >
-                    View Budget Details →
+                    View Budget Details
+                    <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
                   </button>
                 </div>
               </div>
@@ -245,7 +268,7 @@ const MainApp: React.FC = () => {
       )}
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 space-y-6">
         {activeTab === 'expenses' && (
           <div className="space-y-6">
             <ExpenseForm onSubmit={handleAddExpense} />

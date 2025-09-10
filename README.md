@@ -25,10 +25,22 @@ A Progressive Web App for tracking personal expenses with offline functionality,
 - ✅ Responsive design for all screen sizes
 - ✅ App-like experience with manifest.json
 
+### Budget Management
+- ✅ Create custom budgets with flexible time periods (daily, weekly, monthly, yearly)
+- ✅ Category-specific or overall spending limits
+- ✅ Customizable warning thresholds (e.g., alert at 80% of budget)
+- ✅ Real-time budget progress tracking with visual indicators
+- ✅ Smart budget alerts and notifications:
+  - Warning alerts when approaching budget limit
+  - Exceeded alerts when budget is surpassed
+  - Approaching alerts for early warnings
+- ✅ Budget status dashboard with color-coded progress bars
+- ✅ Automatic budget checking after each expense entry
+- ✅ Budget summary widget on main dashboard
+
 ### Advanced Features
 - ✅ Dark mode toggle with system preference detection
 - ✅ CSV export functionality (all data, date ranges, categories)
-- ✅ Budget alerts and notifications
 - ✅ Multi-device synchronization
 - ✅ Offline indicator and sync status
 

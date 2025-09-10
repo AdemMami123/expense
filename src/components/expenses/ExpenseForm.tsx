@@ -59,34 +59,47 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, loading = false }) 
   };
 
   return (
-    <div className="card p-6">
-      <h2 className="text-xl font-semibold mb-4">Add New Expense</h2>
-      
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
+    <div className="card fade-in">
+      <div className="card-header">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Add New Expense</h2>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="amount" className="block text-sm font-medium mb-1">
-              Amount ($)
-            </label>
-            <input
-              type="number"
-              id="amount"
-              name="amount"
-              value={formData.amount || ''}
-              onChange={handleChange}
-              className="input-field"
-              placeholder="0.00"
-              step="0.01"
-              min="0"
-              required
-            />
+      <div className="card-body">
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl mb-6 slide-up">
+            <div className="flex items-center">
+              <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              {error}
+            </div>
           </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label htmlFor="amount" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Amount ($) *
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span className="text-gray-500 dark:text-gray-400 text-lg">$</span>
+                </div>
+                <input
+                  type="number"
+                  id="amount"
+                  name="amount"
+                  value={formData.amount || ''}
+                  onChange={handleChange}
+                  className="input-field pl-8"
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0"
+                  required
+                />
+              </div>
+            </div>
 
           <div>
             <label htmlFor="date" className="block text-sm font-medium mb-1">
@@ -141,14 +154,29 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, loading = false }) 
           />
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? 'Adding Expense...' : 'Add Expense'}
-        </button>
-      </form>
+          <div className="pt-4">
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] flex items-center justify-center"
+            >
+              {loading ? (
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+                  <span>Adding Expense...</span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  <span>Add Expense</span>
+                </div>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

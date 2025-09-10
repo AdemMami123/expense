@@ -39,23 +39,28 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
   ];
 
   return (
-    <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <nav className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 sticky top-16 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex space-x-8">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
-                activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-              }`}
-            >
-              {tab.icon}
-              <span>{tab.name}</span>
-            </button>
-          ))}
+        <div className="flex justify-center sm:justify-start">
+          <div className="flex space-x-1 sm:space-x-8 overflow-x-auto scrollbar-hide">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => onTabChange(tab.id)}
+                className={`flex items-center space-x-2 py-3 sm:py-4 px-3 sm:px-1 border-b-2 font-semibold text-sm transition-all duration-300 whitespace-nowrap min-w-0 ${
+                  activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/20 rounded-t-lg'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-50/50 dark:hover:bg-gray-700/20 rounded-t-lg'
+                }`}
+              >
+                <div className={`transition-transform duration-300 ${activeTab === tab.id ? 'scale-110' : ''}`}>
+                  {tab.icon}
+                </div>
+                <span className="hidden sm:inline">{tab.name}</span>
+                <span className="sm:hidden text-xs">{tab.name}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </nav>

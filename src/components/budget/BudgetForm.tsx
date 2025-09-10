@@ -80,17 +80,17 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
   };
 
   return (
-    <div className="card">
+    <div className="card fade-in">
       <div className="card-header">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
           {isEditing ? 'Edit Budget' : 'Create New Budget'}
         </h3>
       </div>
 
-      <form onSubmit={handleSubmit} className="card-body space-y-4">
+      <form onSubmit={handleSubmit} className="card-body space-y-6">
         {/* Budget Name */}
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <div className="space-y-2">
+          <label htmlFor="name" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
             Budget Name *
           </label>
           <input
@@ -98,11 +98,18 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
             id="name"
             value={formData.name}
             onChange={(e) => handleInputChange('name', e.target.value)}
-            className={`input-field ${errors.name ? 'border-red-500' : ''}`}
+            className={`input-field ${errors.name ? 'border-red-500 ring-red-500 ring-opacity-50' : ''}`}
             placeholder="e.g., Monthly Groceries, Weekly Entertainment"
             disabled={loading}
           />
-          {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+          {errors.name && (
+            <p className="text-red-500 text-sm mt-2 flex items-center">
+              <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              {errors.name}
+            </p>
+          )}
         </div>
 
         {/* Amount */}
